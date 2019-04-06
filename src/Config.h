@@ -1,15 +1,19 @@
 #ifndef CONFIG
 #define CONFIG
 
-#define TRANSMITTER
-// #define RECEIVER
+// #define TRANSMITTER
+#define RECEIVER
 
+// Transmitter config
 #define JOYSTIC_UP_PIN 2
 #define JOYSTIC_RIGHT_PIN 3
 #define JOYSTIC_DOWN_PIN 4
 #define JOYSTIC_LEFT_PIN 5
 #define JOYSTIC_START_PIN 7
 
+#define RF_TRANSFER_DELAY 7
+
+// Receiver config
 #define DRIVER_MOTOR_PIN1 2
 #define DRIVER_MOTOR_PIN2 4
 
@@ -23,9 +27,11 @@
 #define TREASURE_SERVO_OPEN_POSITION 180
 #define TREASURE_SERVO_CLOSED_POSITION 0
 
+#define RF_RECIVER_DELAY 1
+
+// Commun config
 #define RF_RADIO_CE_PIN 9
 #define RF_RADIO_CSN_PIN 10
-#define RF_TRANSFER_DELAY 7
 const byte ADDRESS[6] = "00001";
 
 #endif

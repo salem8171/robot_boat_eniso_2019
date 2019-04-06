@@ -10,6 +10,7 @@ Motor driver_motor;
 Servo treasure_servo;
 Servo direction_servo;
 
+#ifdef TRANSMITTER
 void setup()
 {
     Serial.begin(9600);
@@ -19,12 +20,14 @@ void setup()
 
 void loop()
 {
-    struct transferred_command_datatype data = { dr(JOYSTIC_UP_PIN), dr(JOYSTIC_RIGHT_PIN), dr(JOYSTIC_DOWN_PIN), dr(JOYSTIC_LEFT_PIN), dr(JOYSTIC_START_PIN) };
-    // Serial.println("" + data.forward_movement + data.right_movement + data.backward_movement + data.left_movement + data.treasure_position_up);
+    struct transferred_command_datatype data = { !dr(JOYSTIC_UP_PIN), !dr(JOYSTIC_RIGHT_PIN), !dr(JOYSTIC_DOWN_PIN), !dr(JOYSTIC_LEFT_PIN), !dr(JOYSTIC_START_PIN) };
+    Serial.println((data.forward_movement << 4) + (data.right_movement << 3) + (data.backward_movement << 2) + (data.left_movement << 1) + data.treasure_position_up, BIN);
     radio.write(&data, sizeof(data));
     delay(RF_TRANSFER_DELAY);
 }
+#endif
 
+#ifdef RECEIVER
 void setup()
 {
     Serial.begin(9600);
@@ -36,15 +39,23 @@ void setup()
 
 void loop()
 {
-    if (!radio.available()) return driver_motor.stop();
+    if (!radio.available()) return;
+    
     struct transferred_command_datatype data;
     radio.read(&data, sizeof(data));
-    // Serial.println("" + data.forward_movement + data.right_movement + data.backward_movement + data.left_movement + data.treasure_position_up);
-    if (data.forward_movement) driver_motor.moveForaward();
+    Serial.println((data.forward_movement << 4) + (data.right_movement << 3) + (data.backward_movement << 2) + (data.left_movement << 1) + data.treasure_position_up, BIN);
+    
     if (data.backward_movement) driver_motor.moveBackward();
+    if (data.forward_movement) driver_motor.moveForaward();
+    
     direction_servo.write(DIRECTION_SERVO_MIDDLE_POSITION);
-    if (data.right_movement) direction_servo.write(DIRECTION_SERVO_RIGHT_POSITION);
     if (data.left_movement) direction_servo.write(DIRECTION_SERVO_LEFT_POSITION);
+    if (data.right_movement) direction_servo.write(DIRECTION_SERVO_RIGHT_POSITION);
+    
     treasure_servo.write(data.treasure_position_up ? TREASURE_SERVO_OPEN_POSITION : TREASURE_SERVO_CLOSED_POSITION);
-    delay(RF_TRANSFER_DELAY);
+    
+    delay(RF_RECIVER_DELAY);
+    driver_motor.stop();
+    direction_servo.write(DIRECTION_SERVO_MIDDLE_POSITION);
 }
+#endif
